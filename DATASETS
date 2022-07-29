@@ -2,30 +2,43 @@
 !pip uninstall sqlalchemy==1.4 -y && pip install sqlalchemy==1.3.24
 !pip install ipython-sql
 %load_ext sql
-# Remember the connection string is of the format:
+
+# Remember the connection string formatted like so:
 # %sql ibm_db_sa://my-username:my-password@hostname:port/BLUDB?security=SSL
 # Enter the connection string for your Db2 on Cloud database instance below
 # i.e. copy after db2:// from the URI string in Service Credentials of your Db2 instance. Remove the double quotes at the end.
+
 %sql ibm_db_sa://zpl22708:QPqmqmuvC91F5Vwp@9938aec0-8105-433e-8bf9-0fbb7e483086.c1ogj3sd0tgtu0lqde00.databases.appdomain.cloud:32459/bludb?authSource=admin&replicaSet=replset
+
 import pandas
+
 chicago_socioeconomic_data = pandas.read_csv('https://data.cityofchicago.org/resource/jcxq-k9xf.csv')
 %sql PERSIST chicago_socioeconomic_data
-#First a count of how many rows we have to choose from 
+
+#First, a count of how many rows we have to choose from. 
 %sql SELECT COUNT(*) FROM chicago_socioeconomic_data;
+
 #Then we search for how many defined community areas have a hardship index greater than 50.0 or any other number you want.
 %sql SELECT COUNT(*) FROM chicago_socioeconomic_data WHERE hardship_index > 50.0;
+
 #To give context to the hardship index of 50.0 we look for the max value in that set with the following.
 %sql SELECT MAX(hardship_index) FROM chicago_socioeconomic_data;
+
 #And now we can search for which community area has the highest hardship index
 %sql SELECT community_area_name FROM chicago_socioeconomic_data where hardship_index=98.0
+
 #The following allows us to search for income per community area. Enter any number you wish, but we're looking for more than $60,000.
 %sql SELECT community_area_name FROM chicago_socioeconomic_data where per_capita_income_ > 60000;
+
 #Now we can create a scatterplot with per capita income vs. hardship index for all community areas.
-# if there is a module not found error try unhashing the following line to install seaborn. 
+# if there is a module not found error try unhashing the following line to install seaborn. Otherwise, continue on. 
 #!pip install seaborn==0.9.0
+
 import matplotlib.pyplot as plt
 %matplotlib inline
 import seaborn as sns
 
 income_vs_hardship = %sql SELECT per_capita_income_, hardship_index FROM chicago_socioeconomic_data;
 plot = sns.jointplot(x='per_capita_income_',y='hardship_index', data=income_vs_hardship.DataFrame())
+
+#End
